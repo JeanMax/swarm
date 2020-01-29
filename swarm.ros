@@ -1,0 +1,20 @@
+#!/bin/sh
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;; TODO: move install to Makefile?
+  (ql:quickload :swarm))
+
+(defpackage :ros.script.swarm.3789237396
+  (:use :cl)
+  (:import-from #:swarm
+                #:play))
+(in-package :ros.script.swarm.3789237396)
+
+(defun main (&rest argv)
+  ;; (declare (ignorable argv))
+  (print argv)                          ;DEBUG
+  (swarm:play))
