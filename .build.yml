@@ -1,5 +1,6 @@
 image: archlinux
 packages:
+  - sdl
   - roswell
 sources:
   - git@git.sr.ht:~jean-max/swarm
@@ -16,10 +17,13 @@ tasks:
 
   - sbcl: |
       ros init
+      mkdir -pv ~/common-lisp
+      ln -sv ~/$PROJECT ~/common-lisp/$PROJECT
 
   - build: |
       cd $PROJECT
       make
+      ls -lh $PROJECT
 
   - test: |
       cd $PROJECT
@@ -28,4 +32,6 @@ tasks:
 
   - run: |
       cd $PROJECT
-      timeout 10 ./$PROJECT || test $? = 124
+      # timeout 10 ./$PROJECT || test $? = 124
+      ./$PROJECT |& grep -q 'Cannot initialize the video subsystem.'
+      ./$PROJECT.ros |& grep -q 'Cannot initialize the video subsystem.'
