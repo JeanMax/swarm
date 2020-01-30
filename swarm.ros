@@ -14,6 +14,7 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.swarm.3789237396)
 
 (defun main (&rest argv)
+  ;; (declare (optimize (speed 3) (safety 2)))
   ;; (declare (ignorable argv))
   (print argv)                          ;DEBUG
   (fresh-line)                          ;DEBUG

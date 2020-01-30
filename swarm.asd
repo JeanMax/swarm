@@ -5,7 +5,9 @@
   :depends-on ("lispbuilder-sdl")
   :components ((:module "src"
                 :serial t
-                :components ((:file "2d")
+                :components ((:file "packages")
+                             (:file "2d")
+                             (:file "boids") ; :depends-on ("main"))
                              (:file "main"))))
   :description "A swarm simulator."
   :in-order-to ((test-op (test-op "swarm/tests"))))

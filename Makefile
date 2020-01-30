@@ -22,7 +22,7 @@ PROJECT = swarm
 ROS_SCRIPT = $(PROJECT).ros
 
 # file-names of the sources
-SRC_NAME = main.lisp  2d.lisp
+SRC_NAME = main.lisp  2d.lisp  boids.lisp  packages.lisp
 
 # folder-names of the sources
 VPATH = src  src/term  src/units

@@ -1,8 +1,3 @@
-(defpackage 2d
-  (:documentation "A package to handle all the 2d stuffs... MATHS!")
-  (:use :cl)
-  (:export :point :circle :vect
-           :x :y :radius))
 (in-package :2d)
 
 

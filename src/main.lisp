@@ -1,62 +1,17 @@
-(defpackage game
-  (:documentation "A package to handle the main game logic.")
-  (:use :cl)
-  (:import-from :2d
-                :circle :vect
-                :x :y :radius)
-  (:export :play :*win-width* :*win-height*))
 (in-package :game)
 
-(defparameter *win-width* 1080
-  "The width of the window/game (in pixels).")
-(defparameter *win-height* 720
-  "The height of the window/game (in pixels).")
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BOIDS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass boid (circle vect)
-  ((color
-    :initarg :color
-    :initform sdl:*white*
-    :accessor *color*)))
-
-(defmethod display ((self boid))
-  (with-slots (x y radius color) self
-    (sdl:draw-filled-circle-* x y radius
-                              :color color)))
-
-
-(defun make-random-color ()
-  (sdl:color :r (random 255)
-             :g (random 255)
-             :b (random 255)))
-
-(defun make-random-boid ()
-  (let ((min-radius 3)
-        (max-radius 7))
-    (make-instance 'boid
-                   :x (+ max-radius
-                         (random  (- *win-width*
-                                     (* 2 max-radius))))
-                   :y (+ max-radius
-                         (random  (- *win-height*
-                                     (* 2 max-radius))))
-                   :radius (+ min-radius (random  max-radius))
-                   :color (make-random-color))))
-
-(defparameter *super-boid* (make-instance 'boid
-                                          :x 42 :y 42 :radius 30))
 
 (defparameter *gang-size* 500)
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid)))
+(defparameter *super-boid* (make-instance 'boid
+                                          :x 42 :y 42 :radius 30))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SDL ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; (defparameter *textures-dir* "/home/mc/common-lisp/swarm/textures/")
-(defparameter *fps* 60)
+(defparameter *fps* 60
+  "Frame Per Seconds: this set SDL event loop speed.")
 
 
 (defun init-win ()
