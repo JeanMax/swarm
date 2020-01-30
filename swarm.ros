@@ -9,7 +9,7 @@ exec ros -Q -- $0 "$@"
 
 (defpackage :ros.script.swarm.3789237396
   (:use :cl)
-  (:import-from :game
+  (:import-from :swarm
                 :play))
 (in-package :ros.script.swarm.3789237396)
 
@@ -18,4 +18,4 @@ exec ros -Q -- $0 "$@"
   ;; (declare (ignorable argv))
   (print argv)                          ;DEBUG
   (fresh-line)                          ;DEBUG
-  (game:play))
+  (swarm:play))

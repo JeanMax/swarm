@@ -6,7 +6,7 @@
            :move))
 
 
-(defpackage game
+(defpackage swarm
   (:documentation "A package to handle the main game logic.")
   (:use :cl)
   (:import-from :2d

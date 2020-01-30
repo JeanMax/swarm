@@ -1,4 +1,4 @@
-(in-package :game)
+(in-package :swarm)
 
 
 (defparameter *gang-size* 500)
