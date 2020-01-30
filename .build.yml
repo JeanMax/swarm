@@ -1,0 +1,28 @@
+image: archlinux
+packages:
+  - roswell
+sources:
+  - git@git.sr.ht:~jean-max/swarm
+secrets:
+  - ed142522-17bb-4d9f-ac0e-3be58c6d78ac
+environment:
+  PROJECT: swarm
+
+tasks:
+  - checkout: |
+      cd $PROJECT
+      LAST_COMMIT_HASH=$(git log --remotes | head -n1 | cut -d' ' -f2)
+      git checkout $LAST_COMMIT_HASH
+
+  - build: |
+      cd $PROJECT
+      make
+
+  - test: |
+      cd $PROJECT
+      make todo || true
+      make test
+
+  - run: |
+      cd $PROJECT
+      timeout 10 ./$PROJECT || test $? = 124
