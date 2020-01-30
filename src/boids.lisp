@@ -28,15 +28,20 @@
              :b (random 255)))
 
 ;; TODO: the random distribution sucks
+(defun random-interval (min-val max-val)
+  (+ (random (- max-val min-val -1)) min-val))
+
 (defun make-random-boid ()
   (let ((min-radius 3)
-        (max-radius 7))
-    (make-instance 'boid
-                   :x (+ max-radius
-                         (random  (- *win-width*
-                                     (* 2 max-radius))))
-                   :y (+ max-radius
-                         (random  (- *win-height*
-                                     (* 2 max-radius))))
-                   :radius (+ min-radius (random  max-radius))
-                   :color (make-random-color))))
+        (max-radius 7)
+        (max-speed 5))
+    (make-instance
+     'boid
+     :x (random-interval max-radius (- *win-width* max-radius))
+     :y (random-interval max-radius (- *win-width* max-radius))
+     :radius (random-interval min-radius max-radius)
+     :color (make-random-color)
+     :direction (make-instance
+                 'point
+                 :x (random-interval (- max-speed) max-speed)
+                 :y (random-interval (- max-speed) max-speed)))))

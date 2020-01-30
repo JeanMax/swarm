@@ -28,12 +28,22 @@
 
 
 (defclass vect (point)
-  ((speed
-    :initarg :speed
-    :initform 0
-    :accessor *speed*)
-   (angle
-    :initarg :angle
-    :initform 0
-    :accessor *angle*))
+  (
+   ;; (speed
+   ;;  :initarg :speed
+   ;;  :initform 0
+   ;;  :accessor *speed*
+   ;;  :type float
+   ;;  :documentation "Speed of the point in 'pixel per frame'.")
+   (direction
+    :initarg :direction
+    :initform (make-instance 'point)
+    :accessor *direction*
+    :type point
+    :documentation "A direction point, assuming SELF is at (0, 0)."))
   (:documentation "A moving point."))
+
+(defmethod move ((self vect))
+  (with-slots (x y direction) self
+    (incf x (*x* direction))
+    (incf y (*y* direction))))
