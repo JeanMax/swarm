@@ -1,5 +1,7 @@
 # Swarm - A swarm simulator.
 
+[![builds.sr.ht status](https://builds.sr.ht/~jean-max/swarm.svg)](https://builds.sr.ht/~jean-max/swarm?search=)
+
 ## Usage
 
 ## Installation
