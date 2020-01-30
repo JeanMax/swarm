@@ -22,7 +22,7 @@ PROJECT = swarm
 ROS_SCRIPT = $(PROJECT).ros
 
 # file-names of the sources
-SRC_NAME = main.lisp
+SRC_NAME = main.lisp  2d.lisp
 
 # folder-names of the sources
 VPATH = src  src/term  src/units
@@ -34,9 +34,10 @@ TEST_DIR = tests
 ##
 ## GLOBAL VARIABLES
 ##
-BUILD_FLAGS =	--remove-docstrings \
-				--delete-debug-info \
-				--destroy-packages-sbcl
+BUILD_FLAGS =
+# --remove-docstrings \
+# --delete-debug-info \
+# --destroy-packages-sbcl
 
 # specify flags for commands used in the following rules
 LN =		ln -s

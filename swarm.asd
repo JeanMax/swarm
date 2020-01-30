@@ -2,10 +2,11 @@
   :version "0.1.0"
   :author "JeanMax"
   :license "LLGPL"
-  :depends-on (:lispbuilder-sdl)
+  :depends-on ("lispbuilder-sdl")
   :components ((:module "src"
-                :components
-                ((:file "main"))))
+                :serial t
+                :components ((:file "2d")
+                             (:file "main"))))
   :description "A swarm simulator."
   :in-order-to ((test-op (test-op "swarm/tests"))))
 
@@ -15,7 +16,6 @@
   :depends-on ("swarm"
                "rove")
   :components ((:module "tests"
-                :components
-                ((:file "main"))))
+                :components ((:file "main"))))
   :description "Test system for swarm"
   :perform (test-op (op c) (symbol-call :rove :run c)))
