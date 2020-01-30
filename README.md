@@ -4,16 +4,19 @@
 
 ## Usage
 
+```shell
+./swarm
+```
+
+## Dependencies
+
+* SDL 1.2
+* roswell (TODO: don't)
+* some lisp implementation (SBCL tested)
+
+
 ## Installation
 
-## Author
-
-* JeanMax
-
-## Copyright
-
-Copyright (c) 2020 JeanMax
-
-## License
-
-Licensed under the LLGPL License.
+```shell
+make
+```
