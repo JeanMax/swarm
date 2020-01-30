@@ -3,6 +3,7 @@
   (:use :cl)
   (:export :point :circle :vect
            :x :y :radius
+           :*world-width* :*world-height*
            :move))
 
 
@@ -12,5 +13,6 @@
   (:import-from :2d
                 :point :circle :vect
                 :x :y :radius
+                :*world-width* :*world-height*
                 :move)
   (:export :play ))

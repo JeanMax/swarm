@@ -1,5 +1,10 @@
 (in-package :2d)
 
+(defparameter *world-width* 1080
+  "The width of the window/game (in pixels).")
+(defparameter *world-height* 720
+  "The height of the window/game (in pixels).")
+
 
 (defclass point ()
   ((x
@@ -44,6 +49,13 @@
   (:documentation "A moving point."))
 
 (defmethod move ((self vect))
+  (declare (optimize (speed 3) (safety 2)))
   (with-slots (x y direction) self
-    (incf x (*x* direction))
-    (incf y (*y* direction))))
+    (setf x
+          (mod
+           (+ x (*x* direction))
+           *world-width*))
+    (setf y
+          (mod
+           (+ y (*y* direction))
+           *world-height*))))

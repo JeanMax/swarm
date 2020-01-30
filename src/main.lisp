@@ -1,7 +1,7 @@
 (in-package :swarm)
 
 
-(defparameter *gang-size* 500)
+(defparameter *gang-size* 1000)
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid)))
 (defparameter *super-boid* (make-instance 'boid
                                           :x 42 :y 42 :radius 30))
@@ -16,13 +16,14 @@
 
 (defun init-win ()
   "Initialize the SDL window."
-  (sdl:window *win-width* *win-height*
+  (sdl:window *world-width* *world-height*
               :title-caption "Swarm"
               :flags '(sdl:sdl-hw-surface sdl:sdl-doublebuf))
   (setf (sdl:frame-rate) *fps*))
 
 (defun event-loop ()
   "Handle the SDL events (keyboard mostly)."
+  (declare (optimize (speed 3) (safety 2)))
   (sdl:with-events ()
     (:quit-event () t)
 
@@ -55,6 +56,7 @@
 
 (defun play ()
   "This is the entry point of the swarm simulator."
+  (declare (optimize (speed 3) (safety 2)))
   (sdl:with-init ()
     (init-win)
 

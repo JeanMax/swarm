@@ -1,15 +1,6 @@
 (in-package :swarm)
 
 
-;; TODO: find a better way for these
-(defparameter *win-width* 1080
-  "The width of the window/game (in pixels).")
-(defparameter *win-height* 720
-  "The height of the window/game (in pixels).")
-
-(setf *random-state* (make-random-state t))  ; random seed
-
-
 (defclass boid (circle vect)
   ((color
     :initarg :color
@@ -22,6 +13,8 @@
                               :color color)))
 
 
+(setf *random-state* (make-random-state t))  ; random seed
+
 (defun make-random-color ()
   (sdl:color :r (random 255)
              :g (random 255)
@@ -33,12 +26,12 @@
 
 (defun make-random-boid ()
   (let ((min-radius 3)
-        (max-radius 7)
-        (max-speed 5))
+        (max-radius 5)
+        (max-speed 4))
     (make-instance
      'boid
-     :x (random-interval max-radius (- *win-width* max-radius))
-     :y (random-interval max-radius (- *win-width* max-radius))
+     :x (random-interval max-radius (- *world-width* max-radius))
+     :y (random-interval max-radius (- *world-width* max-radius))
      :radius (random-interval min-radius max-radius)
      :color (make-random-color)
      :direction (make-instance
