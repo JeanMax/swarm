@@ -4,6 +4,20 @@
   "The height of the window/game (in pixels).")
 
 
+(defun mean-direction (direction-list)
+  (let ((n-directions (list-length direction-list)))
+    (labels ((mean-axis (axis-getter)
+               (round (/
+                       (reduce #'+ (mapcar axis-getter direction-list))
+                       n-directions)))))
+    (make-instance 'point
+                   :x (mean-axis #'*x*)
+                   :y (mean-axis #'*y*))))
+
+(defun alignment-force (boid-list)
+  (mean-direction boid-list))
+
+
 (defclass boid (circle vect)
   ((color
     :initarg :color
@@ -20,10 +34,9 @@
 
 (defmethod apply-forces ((self boid))
   (let ((neighbors (find-points-in-range self *boid-gang* *boid-sight-range*)))
-    ;; get forces f1, f2, f3
+        ;; get forces f1, f2, f3
     ;; self.dir = mean(self.prev-dir, f1, f2, f3)
-    )
-  )
+    ))
 
 
 (setf *random-state* (make-random-state t))  ; random seed
