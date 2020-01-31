@@ -1,10 +1,12 @@
 (in-package :swarm)
 
 
-(defparameter *gang-size* 1000)
-(defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid)))
-(defparameter *super-boid* (make-instance 'boid
-                                          :x 42 :y 42 :radius 30))
+(defparameter *gang-size* 1000
+  "The total number of boids simulated.")
+(defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid))
+  "A list of boids to display on screen.")
+(defparameter *super-boid* (make-instance 'boid :x 42 :y 42 :radius 30)
+  "A special boid locked to the mouse coordinates.")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SDL ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

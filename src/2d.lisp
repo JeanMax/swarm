@@ -22,6 +22,7 @@
   (:documentation "A 2d point."))
 
 (defmethod distance ((self point) (rhs point))
+  "Return the distance between 2 points."
   (with-slots ((l-x x) (l-y y)) self
     (with-slots ((r-x x) (r-y y)) rhs
       (let ((x-diff (- r-x l-x))
@@ -30,9 +31,8 @@
                  (* y-diff y-diff)))))))
 
 (defmethod find-points-in-range ((self point) (point-list list) range)
+  "Return all the points from POINT-LIST which are not further than RANGE pixels to POINT."
   (remove-if (lambda (p) (> (distance self p) range)) point-list))
-
-
 
 
 (defclass circle (point)
@@ -55,6 +55,7 @@
   (:documentation "A moving point."))
 
 (defmethod move ((self vect))
+  "Update the VECT coordinates accordingly to its direction."
   (declare (optimize (speed 3) (safety 2)))
   (with-slots (x y direction) self
     (setf x
