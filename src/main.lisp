@@ -1,7 +1,7 @@
 (in-package :swarm)
 
 
-(defparameter *gang-size* 1000
+(defparameter *gang-size* 500
   "The total number of boids simulated.")
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid))
   "A list of boids to display on screen.")
@@ -43,6 +43,8 @@
 
     (:idle ()
            (dolist (b *boid-gang*) (move b))
+           (dolist (b *boid-gang*) (apply-forces b))
+           ;; TODO: apply forces
            (with-slots (x y) *super-boid*
              (setf x (sdl:mouse-x))
              (setf y (sdl:mouse-y)))

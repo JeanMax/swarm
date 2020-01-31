@@ -4,7 +4,7 @@
   (:export :point :circle :vect
            :x :y :radius
            :*world-width* :*world-height*
-           :move))
+           :move :find-points-in-range))
 
 
 (defpackage swarm
@@ -14,5 +14,5 @@
                 :point :circle :vect
                 :x :y :radius
                 :*world-width* :*world-height*
-                :move)
+                :move :find-points-in-range)
   (:export :play ))

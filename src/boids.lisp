@@ -1,5 +1,8 @@
 (in-package :swarm)
 
+(defparameter *boid-sight-range* 10
+  "The height of the window/game (in pixels).")
+
 
 (defclass boid (circle vect)
   ((color
@@ -13,8 +16,14 @@
 (defmethod display ((self boid))
   "Display the given BOID on the sdl window."
   (with-slots (x y radius color) self
-    (sdl:draw-filled-circle-* x y radius
-                              :color color)))
+    (sdl:draw-filled-circle-* x y radius :color color)))
+
+(defmethod apply-forces ((self boid))
+  (let ((neighbors (find-points-in-range self *boid-gang* *boid-sight-range*)))
+    ;; get forces f1, f2, f3
+    ;; self.dir = mean(self.prev-dir, f1, f2, f3)
+    )
+  )
 
 
 (setf *random-state* (make-random-state t))  ; random seed

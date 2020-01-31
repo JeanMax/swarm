@@ -23,6 +23,7 @@
 
 (defmethod distance ((self point) (rhs point))
   "Return the distance between 2 points."
+  (declare (optimize (speed 3) (safety 2)))
   (with-slots ((l-x x) (l-y y)) self
     (with-slots ((r-x x) (r-y y)) rhs
       (let ((x-diff (- r-x l-x))
@@ -32,6 +33,8 @@
 
 (defmethod find-points-in-range ((self point) (point-list list) range)
   "Return all the points from POINT-LIST which are not further than RANGE pixels to POINT."
+  ;; TODO: optimize that with spatial partioning or something
+  (declare (optimize (speed 3) (safety 2)))
   (remove-if (lambda (p) (> (distance self p) range)) point-list))
 
 
@@ -51,18 +54,22 @@
     :initform (make-instance 'point)
     :accessor *direction*
     :type point
-    :documentation "A direction point, assuming SELF is at (0, 0)."))
+    :documentation "A direction point, assuming SELF is at (0, 0).")
+   (previous-direction
+    :initarg :previous-direction
+    :initform (make-instance 'point)
+    :accessor *previous-direction*
+    :type point
+    :documentation "A copy of the previous direction, to allow global movement."))
   (:documentation "A moving point."))
 
 (defmethod move ((self vect))
   "Update the VECT coordinates accordingly to its direction."
   (declare (optimize (speed 3) (safety 2)))
-  (with-slots (x y direction) self
-    (setf x
-          (mod
-           (+ x (*x* direction))
-           *world-width*))
-    (setf y
-          (mod
-           (+ y (*y* direction))
-           *world-height*))))
+  (with-slots (x y direction previous-direction) self
+    (with-slots ((x-dir x) (y-dir y)) direction
+      (setf x (mod (+ x x-dir) *world-width*))
+      (setf y (mod (+ y y-dir) *world-height*))
+      (with-slots ((x-prev x) (y-prev y)) previous-direction
+        (setf x-prev x-dir)
+        (setf y-prev y-dir)))))
