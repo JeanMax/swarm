@@ -40,13 +40,13 @@
                                       (make-random-color))))
 
     (:idle ()
-           (mapc #'move *boid-gang*)
+           (dolist (b *boid-gang*) (move b))
            (with-slots (x y) *super-boid*
              (setf x (sdl:mouse-x))
              (setf y (sdl:mouse-y)))
 
            (sdl:clear-display sdl:*black*)
-           (mapc #'display *boid-gang*)
+           (dolist (b *boid-gang*) (display b))
            (display *super-boid*)
            (sdl:update-display))))
 

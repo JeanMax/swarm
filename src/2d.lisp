@@ -21,6 +21,19 @@
     :documentation "Y axis coordinate."))
   (:documentation "A 2d point."))
 
+(defmethod distance ((self point) (rhs point))
+  (with-slots ((l-x x) (l-y y)) self
+    (with-slots ((r-x x) (r-y y)) rhs
+      (let ((x-diff (- r-x l-x))
+            (y-diff (- r-y l-y)))
+        (sqrt (+ (* x-diff x-diff)
+                 (* y-diff y-diff)))))))
+
+(defmethod find-points-in-range ((self point) (point-list list) range)
+  (remove-if (lambda (p) (> (distance self p) range)) point-list))
+
+
+
 
 (defclass circle (point)
   ((radius
@@ -33,14 +46,7 @@
 
 
 (defclass vect (point)
-  (
-   ;; (speed
-   ;;  :initarg :speed
-   ;;  :initform 0
-   ;;  :accessor *speed*
-   ;;  :type float
-   ;;  :documentation "Speed of the point in 'pixel per frame'.")
-   (direction
+  ((direction
     :initarg :direction
     :initform (make-instance 'point)
     :accessor *direction*
