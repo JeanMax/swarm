@@ -3,7 +3,7 @@
 exec ros -Q -- $0 "$@"
 |#
 
-;; TODO: this is weird
+;; TODO: I'm pretty sure everything is loaded twice
 (progn ;;init forms
   (ros:ensure-asdf)
   (ql:quickload :swarm))

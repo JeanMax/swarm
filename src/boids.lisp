@@ -16,6 +16,9 @@
         (make-instance 'point :x 0 :y 0))))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BOID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defclass boid (circle vect)
   ((color
     :initarg :color
@@ -28,7 +31,10 @@
 (defmethod display ((self boid))
   "Display the given BOID on the sdl window."
   (with-slots (x y radius color) self
-    (sdl:draw-filled-circle-* x y radius :color color)))
+    (sdl:draw-filled-circle-* x y *boid-sight-range* :color (sdl:color :r 255 :a 20))
+    (sdl:draw-filled-circle-* x y radius :color color)
+    ))
+
 
 (defmethod apply-forces ((self boid))
   (let* ((neighbors
@@ -44,7 +50,7 @@
     ;; self.dir = mean(self.prev-dir, f1, f2, f3)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; RANDOM ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (setf *random-state* (make-random-state t))  ; random seed

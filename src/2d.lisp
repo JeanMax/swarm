@@ -2,7 +2,7 @@
 (declaim (optimize (speed 3) (debug 3)))
 
 (declaim (type (unsigned-byte 16) *world-width* *world-height*))
-(defparameter *world-width* 1080
+(defparameter *world-width* 1280
   "The width of the window/game (in pixels).")
 (defparameter *world-height* 720
   "The height of the window/game (in pixels).")
@@ -29,6 +29,7 @@
     (setf l-x new-x)
     (setf l-y new-y)))
 
+(declaim (inline distance))
 (declaim (ftype (function (point point) (unsigned-byte 16)) distance))
 (defmethod distance ((self point) (rhs point))
   "Return the distance between 2 points."

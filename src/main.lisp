@@ -15,6 +15,10 @@
 
 (defparameter *fps* 30
   "Frame Per Seconds: this set SDL event loop speed.")
+(defparameter *textures-dir* "/home/mc/common-lisp/swarm/textures/" ;TODO
+  "Where did you put these bmp files?")
+(defparameter *background-image* nil
+  "A preloaded background image. (Will be loaded in INIT-WINDOW)")
 
 
 (defun init-window ()
@@ -23,6 +27,8 @@
   (sdl:window *world-width* *world-height*
               :title-caption "Swarm"
               :flags '(sdl:sdl-hw-surface sdl:sdl-doublebuf))
+  (setf *background-image*
+        (sdl:load-image (concatenate 'string *textures-dir* "universe.bmp")))
   (setf (sdl:frame-rate) *fps*))
 
 (defun frame-action ()
@@ -33,6 +39,14 @@
     (declare (type (signed-byte 16) x y))
     (setf x (sdl:mouse-x))
     (setf y (sdl:mouse-y))))
+
+(defun redraw ()
+  "Clear screen and redraw everything, then update display."
+  ;; (sdl:clear-display sdl:*black*)
+  (sdl:draw-surface *background-image*)
+  (mapc #'display *boid-gang*)
+  (display *super-boid*)
+  (sdl:update-display))
 
 (defun event-loop ()
   "Handle the SDL events (keyboard mostly)."
@@ -52,14 +66,11 @@
                                       (make-random-color))))
 
     (:idle ()
+
            (frame-action)
+           (redraw)
 
-           (sdl:clear-display sdl:*black*)
-
-           (mapc #'display *boid-gang*)
-           (display *super-boid*)
-
-           (sdl:update-display))))
+           )))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ENTRY POINT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -70,3 +81,12 @@
   (init-window)
   (event-loop)
   (sdl:quit-sdl))
+
+
+
+;; (require :sb-sprof)
+;; (sb-sprof:with-profiling (:max-samples 1000
+;;                           :report :flat
+;;                           :loop t
+;;                           :show-progress t)
+;;   (frame-action))
