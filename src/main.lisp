@@ -2,7 +2,7 @@
 (declaim (optimize (speed 3) (debug 3)))
 
 (declaim (type (unsigned-byte 16) *gang-size* *fps*))
-(defparameter *gang-size* 500
+(defparameter *gang-size* 100
   "The total number of boids simulated.")
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid))
   "A list of boids to display on screen.")
@@ -61,7 +61,7 @@
                        (sdl:push-quit-event)))
 
     (:mouse-button-down-event (:button button) ; :state state :x x :y y)
-                              (when (sdl:key= button :sdl-button-left)
+                              (when (sdl:key= button sdl:sdl-button-left)
                                 (setf (*color* *super-boid*)
                                       (make-random-color))))
 

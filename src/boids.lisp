@@ -4,16 +4,17 @@
 (declaim (type (unsigned-byte 8) *boid-sight-range*))
 (defparameter *boid-sight-range* 30
   "The height of the window/game (in pixels).")
-
+(defparameter *boid-sight-color* (sdl:color :r 255 :a 20)
+  "The height of the window/game (in pixels).")
 
 (defun mean-direction (direction-list)
   (let ((n-directions (list-length direction-list)))
-    (if (> n-directions 0)
+    (when (> n-directions 0)
         (labels ((mean-axis (axis-getter)
                    (round (reduce #'+ (mapcar axis-getter direction-list))
                           n-directions)))
-          (make-instance 'point :x (mean-axis #'*x*) :y (mean-axis #'*y*)))
-        (make-instance 'point :x 0 :y 0))))
+          ; TODO: don't allocate a point each time
+          (make-instance 'point :x (mean-axis #'*x*) :y (mean-axis #'*y*))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BOID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,9 +32,8 @@
 (defmethod display ((self boid))
   "Display the given BOID on the sdl window."
   (with-slots (x y radius color) self
-    (sdl:draw-filled-circle-* x y *boid-sight-range* :color (sdl:color :r 255 :a 20))
-    (sdl:draw-filled-circle-* x y radius :color color)
-    ))
+    (sdl:draw-filled-circle-* x y *boid-sight-range* :color *boid-sight-color*)
+    (sdl:draw-filled-circle-* x y radius :color color)))
 
 
 (defmethod apply-forces ((self boid))
@@ -41,13 +41,12 @@
           (find-points-in-range self *boid-gang* *boid-sight-range*))
          (neighbors-directions
           (mapcar (lambda (n) (*previous-direction* n)) neighbors))
-         (alignment-force
-          (mean-direction neighbors-directions))
-         (new-direction
-          (mean-direction (list (*direction* self) alignment-force))))
-    (set-coords (*direction* self) (*x* new-direction) (*y* new-direction))))
-        ;; get forces f1, f2, f3
-    ;; self.dir = mean(self.prev-dir, f1, f2, f3)
+         (alignment-force (mean-direction neighbors-directions))
+         (new-direction nil))
+    (unless (null alignment-force)
+      (setf new-direction
+            (mean-direction (list (*direction* self) alignment-force)))
+      (set-coords (*direction* self) (*x* new-direction) (*y* new-direction)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; RANDOM ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
