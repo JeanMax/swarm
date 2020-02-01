@@ -3,6 +3,7 @@
 exec ros -Q -- $0 "$@"
 |#
 
+;; TODO: this is weird
 (progn ;;init forms
   (ros:ensure-asdf)
   (ql:quickload :swarm))
@@ -12,10 +13,8 @@ exec ros -Q -- $0 "$@"
   (:import-from :swarm
                 :play))
 (in-package :ros.script.swarm.3789237396)
+(declaim (optimize (speed 3) (debug 3)))
 
 (defun main (&rest argv)
-  (declare (optimize (speed 3) (safety 2)))
-  ;; (declare (ignorable argv))
-  (print argv)                          ;DEBUG
-  (fresh-line)                          ;DEBUG
+  (declare (ignorable argv))
   (swarm:play))

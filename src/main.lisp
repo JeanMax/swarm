@@ -1,6 +1,7 @@
 (in-package :swarm)
+(declaim (optimize (speed 3) (debug 3)))
 
-
+(declaim (type (unsigned-byte 16) *gang-size* *fps*))
 (defparameter *gang-size* 500
   "The total number of boids simulated.")
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid))
@@ -12,20 +13,29 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SDL ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defparameter *fps* 60
+(defparameter *fps* 30
   "Frame Per Seconds: this set SDL event loop speed.")
 
 
-(defun init-win ()
+(defun init-window ()
   "Initialize the SDL window."
+  (sdl:init-sdl)
   (sdl:window *world-width* *world-height*
               :title-caption "Swarm"
               :flags '(sdl:sdl-hw-surface sdl:sdl-doublebuf))
   (setf (sdl:frame-rate) *fps*))
 
+(defun frame-action ()
+  "This function will be called each frame to handle all game logic (!graphics)."
+  (mapc #'move *boid-gang*)
+  (mapc #'apply-forces *boid-gang*)
+  (with-slots (x y) *super-boid*
+    (declare (type (signed-byte 16) x y))
+    (setf x (sdl:mouse-x))
+    (setf y (sdl:mouse-y))))
+
 (defun event-loop ()
   "Handle the SDL events (keyboard mostly)."
-  (declare (optimize (speed 3) (safety 2)))
   (sdl:with-events ()
     (:quit-event () t)
 
@@ -37,21 +47,18 @@
                        (sdl:push-quit-event)))
 
     (:mouse-button-down-event (:button button) ; :state state :x x :y y)
-                              (when (sdl:key= button sdl:sdl-button-left)
+                              (when (sdl:key= button :sdl-button-left)
                                 (setf (*color* *super-boid*)
                                       (make-random-color))))
 
     (:idle ()
-           (dolist (b *boid-gang*) (move b))
-           (dolist (b *boid-gang*) (apply-forces b))
-           ;; TODO: apply forces
-           (with-slots (x y) *super-boid*
-             (setf x (sdl:mouse-x))
-             (setf y (sdl:mouse-y)))
+           (frame-action)
 
            (sdl:clear-display sdl:*black*)
-           (dolist (b *boid-gang*) (display b))
+
+           (mapc #'display *boid-gang*)
            (display *super-boid*)
+
            (sdl:update-display))))
 
 
@@ -60,12 +67,6 @@
 
 (defun play ()
   "This is the entry point of the swarm simulator."
-  (declare (optimize (speed 3) (safety 2)))
-  (sdl:with-init ()
-    (init-win)
-
-    ;; (sdl:draw-surface (sdl:load-image (concatenate 'string
-    ;;                                                *textures-dir* "xkcd.bmp")))
-    ;; (sdl:update-display)
-
-    (event-loop)))
+  (init-window)
+  (event-loop)
+  (sdl:quit-sdl))

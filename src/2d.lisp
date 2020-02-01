@@ -1,5 +1,7 @@
 (in-package :2d)
+(declaim (optimize (speed 3) (debug 3)))
 
+(declaim (type (unsigned-byte 16) *world-width* *world-height*))
 (defparameter *world-width* 1080
   "The width of the window/game (in pixels).")
 (defparameter *world-height* 720
@@ -21,21 +23,31 @@
     :documentation "Y axis coordinate."))
   (:documentation "A 2d point."))
 
+(defmethod set-coords ((self point) new-x new-y)
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y new-x new-y))
+    (setf l-x new-x)
+    (setf l-y new-y)))
+
+(declaim (ftype (function (point point) (unsigned-byte 16)) distance))
 (defmethod distance ((self point) (rhs point))
   "Return the distance between 2 points."
-  (declare (optimize (speed 3) (safety 2)))
   (with-slots ((l-x x) (l-y y)) self
     (with-slots ((r-x x) (r-y y)) rhs
+      (declare (type (signed-byte 16) l-x l-y r-x r-y))
       (let ((x-diff (- r-x l-x))
             (y-diff (- r-y l-y)))
-        (sqrt (+ (* x-diff x-diff)
-                 (* y-diff y-diff)))))))
+        (round (sqrt (+ (* x-diff x-diff)
+                        (* y-diff y-diff))))))))
 
-(defmethod find-points-in-range ((self point) (point-list list) range)
+(defmethod find-points-in-range ((self point) (point-list list) range
+                                 &optional (include-self nil))
   "Return all the points from POINT-LIST which are not further than RANGE pixels to POINT."
+  (declare (type (unsigned-byte 16) range))
   ;; TODO: optimize that with spatial partioning or something
-  (declare (optimize (speed 3) (safety 2)))
-  (remove-if (lambda (p) (> (distance self p) range)) point-list))
+  (remove-if (lambda (p) (or (> (distance self p) range)
+                             (and (not include-self) (eq p self))))
+             point-list))
 
 
 (defclass circle (point)
@@ -65,11 +77,9 @@
 
 (defmethod move ((self vect))
   "Update the VECT coordinates accordingly to its direction."
-  (declare (optimize (speed 3) (safety 2)))
   (with-slots (x y direction previous-direction) self
     (with-slots ((x-dir x) (y-dir y)) direction
+      (declare (type (signed-byte 16) x y x-dir y-dir))
       (setf x (mod (+ x x-dir) *world-width*))
       (setf y (mod (+ y y-dir) *world-height*))
-      (with-slots ((x-prev x) (y-prev y)) previous-direction
-        (setf x-prev x-dir)
-        (setf y-prev y-dir)))))
+      (set-coords previous-direction x-dir y-dir))))
