@@ -7,7 +7,7 @@
 (defparameter *boid-sight-color* (sdl:color :r 255 :a 20)
   "The height of the window/game (in pixels).")
 
-(defun mean-direction (direction-list)
+(defun mean-coord (direction-list)
   (let ((n-directions (list-length direction-list)))
     (when (> n-directions 0)
         (labels ((mean-axis (axis-getter)
@@ -37,15 +37,21 @@
 
 
 (defmethod apply-forces ((self boid))
-  (let* ((neighbors
-          (find-points-in-range self *boid-gang* *boid-sight-range*))
-         (neighbors-directions
-          (mapcar (lambda (n) (*previous-direction* n)) neighbors))
-         (alignment-force (mean-direction neighbors-directions))
+  (let ((neighbors
+         (find-points-in-range self *boid-gang* *boid-sight-range*))
+         (alignment-force nil)
+         (cohesion-force nil)
          (new-direction nil))
-    (unless (null alignment-force)
+    (unless (null neighbors)
+      (setf alignment-force
+            (mean-coord
+             (mapcar (lambda (n) (*previous-direction* n)) neighbors)))
+      (setf cohesion-force
+            (sub (mean-coord neighbors) self))
       (setf new-direction
-            (mean-direction (list (*direction* self) alignment-force)))
+            (mean-coord (list (*direction* self)
+                              alignment-force
+                              cohesion-force)))
       (set-coords (*direction* self) (*x* new-direction) (*y* new-direction)))))
 
 

@@ -29,13 +29,32 @@
     (setf l-x new-x)
     (setf l-y new-y)))
 
+(defmethod add ((self point) (rhs point))
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
+    (with-slots ((r-x x) (r-y y)) rhs
+      (declare (type (signed-byte 16) r-x r-y))
+      (setf l-x (+ l-x r-x))
+      (setf l-y (+ l-y r-y))))
+  self)
+
+(defmethod sub ((self point) (rhs point))
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
+    (with-slots ((r-x x) (r-y y)) rhs
+      (declare (type (signed-byte 16) r-x r-y))
+      (setf l-x (- l-x r-x))
+      (setf l-y (- l-y r-y))))
+  self)
+
 (declaim (inline distance))
 (declaim (ftype (function (point point) (unsigned-byte 16)) distance))
 (defmethod distance ((self point) (rhs point))
   "Return the distance between 2 points."
   (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
     (with-slots ((r-x x) (r-y y)) rhs
-      (declare (type (signed-byte 16) l-x l-y r-x r-y))
+      (declare (type (signed-byte 16) r-x r-y))
       (let ((x-diff (- r-x l-x))
             (y-diff (- r-y l-y)))
         (round (sqrt (+ (* x-diff x-diff)
@@ -79,8 +98,9 @@
 (defmethod move ((self vect))
   "Update the VECT coordinates accordingly to its direction."
   (with-slots (x y direction previous-direction) self
+    (declare (type (signed-byte 16) x y))
     (with-slots ((x-dir x) (y-dir y)) direction
-      (declare (type (signed-byte 16) x y x-dir y-dir))
+      (declare (type (signed-byte 16) x-dir y-dir))
       (setf x (mod (+ x x-dir) *world-width*))
       (setf y (mod (+ y y-dir) *world-height*))
       (set-coords previous-direction x-dir y-dir))))

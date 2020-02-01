@@ -8,7 +8,7 @@
            :x :y :radius
            :*x* :*y* :*direction* :*previous-direction*  ; TODO: don't use muffle here
            :*world-width* :*world-height*
-           :set-coords :move :find-points-in-range))
+           :set-coords :add :sub :move :find-points-in-range))
 
 
 (defpackage swarm
@@ -19,5 +19,5 @@
                 :x :y :radius
                 :*x* :*y* :*direction* :*previous-direction*
                 :*world-width* :*world-height*
-                :set-coords :move :find-points-in-range)
+                :set-coords :add :sub :move :find-points-in-range)
   (:export :play ))
