@@ -2,7 +2,7 @@
 (declaim (optimize (speed 3) (debug 3)))
 
 (declaim (type (unsigned-byte 8) *boid-sight-range*))
-(defparameter *boid-sight-range* 100
+(defparameter *boid-sight-range* 50
   "The height of the window/game (in pixels).")
 (defparameter *boid-sight-color* (sdl:color :r 255 :a 20)
   "The height of the window/game (in pixels).")
@@ -20,7 +20,7 @@
   (mul
    (mean-coord
     (mapcar (lambda (n) (*previous-direction* n)) neighbors))
-  42))
+  2))
 
 (defun cohesion-force (self neighbors)
   (mul (sub (mean-coord neighbors) self) 2))
@@ -63,7 +63,9 @@
                               (alignment-force neighbors)
                               (separation-force self neighbors)
                               (cohesion-force self neighbors))))
-      (set-coords (*direction* self) (*x* new-direction) (*y* new-direction)))))
+      (set-coords (*direction* self)
+                  (rem (the integer (*x* new-direction)) +world-width+)  ; rem -> speed limit
+                  (rem (the integer (*y* new-direction)) +world-height+)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; RANDOM ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -91,8 +93,8 @@
     (declare (type (unsigned-byte 4) min-radius max-radius max-speed))
     (make-instance
      'boid
-     :x (random-interval max-radius (- *world-width* max-radius))
-     :y (random-interval max-radius (- *world-width* max-radius))
+     :x (random-interval max-radius (- +world-width+ max-radius))
+     :y (random-interval max-radius (- +world-height+ max-radius))
      :radius (random-interval min-radius max-radius)
      :color (make-random-color)
      :direction (make-instance

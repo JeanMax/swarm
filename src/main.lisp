@@ -24,7 +24,7 @@
 (defun init-window ()
   "Initialize the SDL window."
   (sdl:init-sdl)
-  (sdl:window *world-width* *world-height*
+  (sdl:window +world-width+ +world-height+
               :title-caption "Swarm"
               :flags '(sdl:sdl-hw-surface sdl:sdl-doublebuf))
   (setf *background-image*
@@ -38,8 +38,8 @@
   (with-slots (x y) *super-boid*
     (declare (type (signed-byte 16) x y))
     (setf x (sdl:mouse-x))
-    (setf y (sdl:mouse-y))))
-  (mapc #'apply-forces (cons *super-boid* *boid-gang*))
+    (setf y (sdl:mouse-y)))
+  (mapc #'apply-forces (cons *super-boid* *boid-gang*)))
 
 (defun redraw ()
   "Clear screen and redraw everything, then update display."
@@ -86,9 +86,9 @@
 
 
 ;; (require :sb-sprof)
-;; (sb-sprof:with-profiling (:max-samples (* *fps* 5)
+;; (sb-sprof:with-profiling (:max-samples (* *fps* 10)
 ;;                           :report :flat
-;;                           :loop t
-;;                           :mode :cpu ; :alloc
+;;                           :loop t :reset t
+;;                           :mode :cpu
 ;;                           :show-progress t)
-;;   (frame-action))
+;;   (dotimes (i 10000)(frame-action)))

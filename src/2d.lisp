@@ -1,25 +1,24 @@
 (in-package :2d)
 (declaim (optimize (speed 3) (debug 3)))
 
-(declaim (type (unsigned-byte 16) *world-width* *world-height* *tile-size*))
-(defparameter *world-width* 1280
+(declaim (type (unsigned-byte 16) +world-width+ +world-height+
+               +tile-size+ +grid-width+ +grid-height+))
+(declaim (type (simple-array list) *grid*))
+(defconstant +world-width+ 1280
   "The width of the window/game (in pixels).")
-(defparameter *world-height* 720
+(defconstant +world-height+ 720
   "The height of the window/game (in pixels).")
 
-(defparameter *tile-size* 100)
-(declaim (type (simple-array list) *grid*))
-(defparameter *grid* (make-array (list (ceiling *world-height* *tile-size*)
-                                       (ceiling *world-width* *tile-size*))
+(defconstant +tile-size+ 100)
+(defconstant +grid-width+ (ceiling +world-width+ +tile-size+))
+(defconstant +grid-height+ (ceiling +world-height+ +tile-size+))
+(defparameter *grid* (make-array (list +grid-height+ +grid-width+)
                                  :initial-element nil))
 
 (defun reset-grid ()
-  (let ((max-y (first (array-dimensions *grid*)))
-        (max-x (second (array-dimensions *grid*))))
-    (declare (type (unsigned-byte 16) max-x max-y))
-    (loop for y from 0 below max-y do
-      (loop for x from 0 below max-x do
-           (setf (aref *grid* y x) nil)))))
+  (loop for y of-type (unsigned-byte 16) from 0 below +grid-height+ do
+       (loop for x of-type (unsigned-byte 16) from 0 below +grid-width+ do
+            (setf (aref *grid* y x) nil))))
 
 (defclass point ()
   ((x
@@ -76,29 +75,18 @@
     (setf l-y (round l-y scalar)))
   self)
 
-(declaim (inline add-to-grid))
-(defmethod add-to-grid ((self point))
-  (with-slots ((l-x x) (l-y y)) self
-    (declare (type (signed-byte 16) l-x l-y))
-    (push self (aref *grid*
-                     (truncate l-y *tile-size*)
-                     (truncate l-x *tile-size*)))))
-
 (defmethod find-points-maybe-in-range ((self point) range)
-  (declare (type (signed-byte 16) range))
+  (declare (type (unsigned-byte 16) range))
   (with-slots ((l-x x) (l-y y)) self
-    (declare (type (signed-byte 16) l-x l-y))
+    (declare (type (unsigned-byte 16) l-x l-y))
     (let ((ret nil)
-          (offset (ceiling range *tile-size*))
-          (grid-y (truncate l-y *tile-size*))
-          (grid-x (truncate l-x *tile-size*))
-          (max-y (first (array-dimensions *grid*)))
-          (max-x (second (array-dimensions *grid*))))
-      (declare (type (signed-byte 16) offset grid-x grid-y max-x max-y))
-      ;; (break)                           ;DEBUG
+          (offset (ceiling range +tile-size+))
+          (grid-y (truncate l-y +tile-size+))
+          (grid-x (truncate l-x +tile-size+)))
+      (declare (type (unsigned-byte 16) offset grid-x grid-y))
       (loop for y from (- grid-y offset) below (+ grid-y offset 1) do
            (loop for x from (- grid-x offset) below (+ grid-x offset 1) do
-                (when (and (< -1 y max-y) (< -1 x max-x))
+                (when (and (< -1 y +grid-height+) (< -1 x +grid-width+))
                     (setf ret (append (aref *grid* y x) ret)))))
       ret)))
 
@@ -164,7 +152,9 @@
     (declare (type (signed-byte 16) x y))
     (with-slots ((x-dir x) (y-dir y)) direction
       (declare (type (signed-byte 16) x-dir y-dir))
-      (setf x (mod (+ x x-dir) *world-width*))
-      (setf y (mod (+ y y-dir) *world-height*))
+      (setf x (mod (+ x x-dir) +world-width+))
+      (setf y (mod (+ y y-dir) +world-height+))
       (set-coords previous-direction x-dir y-dir)
-      (add-to-grid self))))
+      (push self (aref *grid*
+                       (truncate (the (unsigned-byte 16) y) +tile-size+)
+                       (truncate (the (unsigned-byte 16) x) +tile-size+))))))
