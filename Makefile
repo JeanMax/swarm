@@ -69,16 +69,16 @@ BASIC =		\033[0m
 ##
 
 # release build
-all:
+all: deps
 	+$(MAKE) $(PROJECT)
 
 # install deps
-install:
+deps:
 	$(ROS) -e '(ql:quickload :swarm)'
 # TODO: create symlink
 
 # install dev deps
-dev:
+deps-test: $(PROJECT).asd
 	$(ROS) -e '(ql:quickload :swarm/tests)'
 
 # remove all junk files
@@ -96,7 +96,7 @@ re: fclean
 	+$(MAKE) all
 
 # run tests on project
-test: dev
+test: deps-test
 	$(ROS) -e '(asdf:test-system :swarm)'
 	$(PRINTF) "All tests passed!\n"
 
@@ -116,4 +116,5 @@ $(PROJECT): $(SRC_NAME) $(ROS_SCRIPT)
 
 # just to avoid conflicts between rules and files/folders names
 .PHONY: all, $(PROJECT), \
+deps, deps-test, \
 clean, fclean, mrproper, re, test, todo

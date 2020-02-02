@@ -22,6 +22,7 @@ tasks:
 
   - build: |
       cd $PROJECT
+      make deps
       make
       ls -lh $PROJECT
 
