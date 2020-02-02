@@ -47,6 +47,22 @@
       (setf l-y (- l-y r-y))))
   self)
 
+(defmethod mul ((self point) scalar)
+  (declare (type (signed-byte 16) scalar))
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
+    (setf l-x (* l-x scalar))
+    (setf l-y (* l-y scalar)))
+  self)
+
+(defmethod div ((self point) scalar)
+  (declare (type (signed-byte 16) scalar))
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
+    (setf l-x (round l-x scalar))
+    (setf l-y (round l-y scalar)))
+  self)
+
 (declaim (inline distance))
 (declaim (ftype (function (point point) (unsigned-byte 16)) distance))
 (defmethod distance ((self point) (rhs point))

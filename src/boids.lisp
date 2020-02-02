@@ -2,7 +2,7 @@
 (declaim (optimize (speed 3) (debug 3)))
 
 (declaim (type (unsigned-byte 8) *boid-sight-range*))
-(defparameter *boid-sight-range* 30
+(defparameter *boid-sight-range* 100
   "The height of the window/game (in pixels).")
 (defparameter *boid-sight-color* (sdl:color :r 255 :a 20)
   "The height of the window/game (in pixels).")
@@ -15,6 +15,23 @@
                           n-directions)))
           ; TODO: don't allocate a point each time
           (make-instance 'point :x (mean-axis #'*x*) :y (mean-axis #'*y*))))))
+
+(defun alignment-force (neighbors)
+  (mul
+   (mean-coord
+    (mapcar (lambda (n) (*previous-direction* n)) neighbors))
+  4))
+
+(defun cohesion-force (self neighbors)
+  (mul (sub (mean-coord neighbors) self) 2))
+
+(defun separation-force (self neighbors)
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
+    (div (mean-coord (mapcar
+                      (lambda (n) (sub (make-instance 'point :x l-x :y l-y) n))
+                      neighbors))
+         3)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BOID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -39,19 +56,13 @@
 (defmethod apply-forces ((self boid))
   (let ((neighbors
          (find-points-in-range self *boid-gang* *boid-sight-range*))
-         (alignment-force nil)
-         (cohesion-force nil)
          (new-direction nil))
     (unless (null neighbors)
-      (setf alignment-force
-            (mean-coord
-             (mapcar (lambda (n) (*previous-direction* n)) neighbors)))
-      (setf cohesion-force
-            (sub (mean-coord neighbors) self))
       (setf new-direction
             (mean-coord (list (*direction* self)
-                              alignment-force
-                              cohesion-force)))
+                              (alignment-force neighbors)
+                              (separation-force self neighbors)
+                              (cohesion-force self neighbors))))
       (set-coords (*direction* self) (*x* new-direction) (*y* new-direction)))))
 
 

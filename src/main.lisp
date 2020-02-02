@@ -2,11 +2,11 @@
 (declaim (optimize (speed 3) (debug 3)))
 
 (declaim (type (unsigned-byte 16) *gang-size* *fps*))
-(defparameter *gang-size* 100
+(defparameter *gang-size* 50
   "The total number of boids simulated.")
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid))
   "A list of boids to display on screen.")
-(defparameter *super-boid* (make-instance 'boid :x 42 :y 42 :radius 30)
+(defparameter *super-boid* (make-instance 'boid :x 42 :y 42 :radius 10)
   "A special boid locked to the mouse coordinates.")
 
 
@@ -34,11 +34,11 @@
 (defun frame-action ()
   "This function will be called each frame to handle all game logic (!graphics)."
   (mapc #'move *boid-gang*)
-  (mapc #'apply-forces *boid-gang*)
   (with-slots (x y) *super-boid*
     (declare (type (signed-byte 16) x y))
     (setf x (sdl:mouse-x))
     (setf y (sdl:mouse-y))))
+  (mapc #'apply-forces (cons *super-boid* *boid-gang*))
 
 (defun redraw ()
   "Clear screen and redraw everything, then update display."
@@ -85,8 +85,9 @@
 
 
 ;; (require :sb-sprof)
-;; (sb-sprof:with-profiling (:max-samples 1000
+;; (sb-sprof:with-profiling (:max-samples (* *fps* 5)
 ;;                           :report :flat
 ;;                           :loop t
+;;                           :mode :cpu ; :alloc
 ;;                           :show-progress t)
 ;;   (frame-action))
