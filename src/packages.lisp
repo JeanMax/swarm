@@ -22,4 +22,5 @@
                 :+world-width+ :+world-height+
                 :set-coords :add :sub :mulf :mul :div :move
                 :reset-grid  :find-points-in-range)
-  (:export :play :*alignment-coef* :*cohesion-coef* :*separation-coef*))
+  (:export :play
+           :*alignment-coef* :*cohesion-coef* :*separation-coef* :*gang-size*))
