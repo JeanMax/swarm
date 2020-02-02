@@ -20,7 +20,7 @@
   (mul
    (mean-coord
     (mapcar (lambda (n) (*previous-direction* n)) neighbors))
-  4))
+  42))
 
 (defun cohesion-force (self neighbors)
   (mul (sub (mean-coord neighbors) self) 2))
@@ -55,7 +55,7 @@
 
 (defmethod apply-forces ((self boid))
   (let ((neighbors
-         (find-points-in-range self *boid-gang* *boid-sight-range*))
+         (find-points-in-range self *boid-sight-range*))
          (new-direction nil))
     (unless (null neighbors)
       (setf new-direction

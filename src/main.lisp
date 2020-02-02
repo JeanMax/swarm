@@ -33,6 +33,7 @@
 
 (defun frame-action ()
   "This function will be called each frame to handle all game logic (!graphics)."
+  (reset-grid)
   (mapc #'move *boid-gang*)
   (with-slots (x y) *super-boid*
     (declare (type (signed-byte 16) x y))
