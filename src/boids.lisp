@@ -7,6 +7,11 @@
 (defparameter *boid-sight-color* (sdl:color :r 255 :a 20)
   "The height of the window/game (in pixels).")
 
+(declaim (type single-float *alignment-coef* *cohesion-coef* *separation-coef*))
+(defparameter *alignment-coef* 3.33)
+(defparameter *cohesion-coef* 0.9)
+(defparameter *separation-coef* 0.9)
+
 (defun mean-coord (direction-list)
   (let ((n-directions (list-length direction-list)))
     (when (> n-directions 0)
@@ -17,21 +22,21 @@
           (make-instance 'point :x (mean-axis #'*x*) :y (mean-axis #'*y*))))))
 
 (defun alignment-force (neighbors)
-  (mul
+  (mulf
    (mean-coord
     (mapcar (lambda (n) (*previous-direction* n)) neighbors))
-  2))
+  *alignment-coef*))
 
 (defun cohesion-force (self neighbors)
-  (mul (sub (mean-coord neighbors) self) 2))
+  (mulf (sub (mean-coord neighbors) self) *cohesion-coef*))
 
 (defun separation-force (self neighbors)
   (with-slots ((l-x x) (l-y y)) self
     (declare (type (signed-byte 16) l-x l-y))
-    (div (mean-coord (mapcar
+    (mulf (mean-coord (mapcar
                       (lambda (n) (sub (make-instance 'point :x l-x :y l-y) n))
                       neighbors))
-         3)))
+         *separation-coef*)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BOID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

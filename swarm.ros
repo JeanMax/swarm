@@ -4,9 +4,12 @@ exec ros -Q -- $0 "$@"
 |#
 
 ;; TODO: I'm pretty sure everything is loaded twice
-(progn ;;init forms
-  (ros:ensure-asdf)
-  (ql:quickload :swarm))
+
+;; (progn ;;init forms
+;;   (ros:ensure-asdf)
+;;   (ql:quickload :swarm))
+
+(asdf:load-system :swarm)
 
 (defpackage :ros.script.swarm.3789237396
   (:use :cl)
@@ -15,6 +18,86 @@ exec ros -Q -- $0 "$@"
 (in-package :ros.script.swarm.3789237396)
 (declaim (optimize (speed 3) (debug 3)))
 
+(defun parse-float (s)
+  (declare (type (simple-array character) s))
+  (with-input-from-string (in s)
+    (read in)))
+
+(defun print-usage-and-exit (status)
+  (opts:describe
+   :prefix "A swarm (boids) simulator."
+   ;; :suffix "so that's how it works…"
+   ;; :args     "[FREE-ARGS]"
+   :usage-of "swarm")
+  (opts:exit status))
+
+(defun unknown-option (condition)
+  (format t "warning: ~s option is unknown!~%" (opts:option condition))
+  ;; (invoke-restart 'opts:skip-option)
+  (print-usage-and-exit 1))
+
+(defmacro when-option ((options opt) &body body)
+  `(let ((it (getf ,options ,opt)))
+     (when it
+       ,@body)))
+
+(opts:define-opts
+  (:name :help
+   :description "print this help text"
+   :short #\h
+   :long "help")
+  ;; (:name :verbose
+  ;;  :description "verbose output"
+  ;;  ;; :required t
+  ;;  :short #\v
+  ;;  :long "verbose")
+  (:name :coef-s
+   :description "the coefficient for the SEPARATION force"
+   :short #\s
+   :long "separation"
+   :arg-parser #'parse-float
+   :meta-var "COEF-S")
+  (:name :coef-a
+   :description "the coefficient for the ALIGNMENT force"
+   :short #\a
+   :long "alignment"
+   :arg-parser #'parse-float
+   :meta-var "COEF-A")
+  (:name :coef-c
+   :description "the coefficient for the COHESION force"
+   :short #\c
+   :long "cohesion"
+   :arg-parser #'parse-float
+   :meta-var "COEF-C"))
+
+
 (defun main (&rest argv)
-  (declare (ignorable argv))
+  (multiple-value-bind (options)
+      (handler-case
+          (handler-bind ((opts:unknown-option #'unknown-option))
+            (opts:get-opts argv))
+        (opts:missing-arg (condition)
+          (format t "fatal: option ~s needs an argument!~%"
+                  (opts:option condition))
+          (print-usage-and-exit 1))
+        (opts:arg-parser-failed (condition)
+          (format t "fatal: cannot parse ~s as argument of ~s~%"
+                  (opts:raw-arg condition)
+                  (opts:option condition))
+          (print-usage-and-exit 1))
+        (opts:missing-required-option (con)
+          (format t "fatal: ~a~%" con)
+          (print-usage-and-exit 1)))
+
+    (when-option (options :help)
+      (print-usage-and-exit 0))
+    ;; (format t "free args: ~{~a~^, ~}~%" free-args)
+    ;; (when-option (options :verbose)
+    ;;              (format t "OK, running in verbose mode…~%"))
+    (when-option (options :coef-s)
+      (setf swarm:*separation-coef* it))
+    (when-option (options :coef-a)
+      (setf swarm:*alignment-coef* it))
+    (when-option (options :coef-c)
+      (setf swarm:*cohesion-coef* it)))
   (swarm:play))

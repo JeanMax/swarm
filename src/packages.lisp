@@ -5,10 +5,10 @@
   (:documentation "A package to handle all the 2d stuffs... MATHS!")
   (:use :cl)
   (:export :point :circle :vect
-           :x :y :radius
+           :x :y :radius :direction
            :*x* :*y* :*direction* :*previous-direction*  ; TODO: don't use muffle here
            :+world-width+ :+world-height+
-           :set-coords :add :sub :mul :div :move
+           :set-coords :add :sub :mulf :mul :div :move
            :reset-grid :find-points-in-range))
 
 
@@ -17,9 +17,9 @@
   (:use :cl)
   (:import-from :2d
                 :point :circle :vect
-                :x :y :radius
+                :x :y :radius :direction
                 :*x* :*y* :*direction* :*previous-direction*
                 :+world-width+ :+world-height+
-                :set-coords :add :sub :mul :div :move
+                :set-coords :add :sub :mulf :mul :div :move
                 :reset-grid  :find-points-in-range)
-  (:export :play))
+  (:export :play :*alignment-coef* :*cohesion-coef* :*separation-coef*))

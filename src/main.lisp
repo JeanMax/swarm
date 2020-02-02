@@ -2,7 +2,7 @@
 (declaim (optimize (speed 3) (debug 3)))
 
 (declaim (type (unsigned-byte 16) *gang-size* *fps*))
-(defparameter *gang-size* 50
+(defparameter *gang-size* 256
   "The total number of boids simulated.")
 (defparameter *boid-gang* (loop repeat *gang-size* collect (make-random-boid))
   "A list of boids to display on screen.")
@@ -34,9 +34,11 @@
 (defun frame-action ()
   "This function will be called each frame to handle all game logic (!graphics)."
   (reset-grid)
-  (mapc #'move *boid-gang*)
-  (with-slots (x y) *super-boid*
+  (mapc #'move (cons *super-boid* *boid-gang*))
+  (with-slots (x y direction) *super-boid*
     (declare (type (signed-byte 16) x y))
+    ;; (set-coords direction (- x (sdl:mouse-x)) (- y (sdl:mouse-y)))
+    (format t "dir: (~D, ~D)~&" (*x* direction) (*y* direction)) ;DEBUG
     (setf x (sdl:mouse-x))
     (setf y (sdl:mouse-y)))
   (mapc #'apply-forces (cons *super-boid* *boid-gang*)))

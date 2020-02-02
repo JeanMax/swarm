@@ -59,6 +59,14 @@
       (setf l-y (- l-y r-y))))
   self)
 
+(defmethod mulf ((self point) scalar)
+  (declare (type single-float scalar))
+  (with-slots ((l-x x) (l-y y)) self
+    (declare (type (signed-byte 16) l-x l-y))
+    (setf l-x (round (* l-x scalar)))
+    (setf l-y (round (* l-y scalar))))
+  self)
+
 (defmethod mul ((self point) scalar)
   (declare (type (signed-byte 16) scalar))
   (with-slots ((l-x x) (l-y y)) self
@@ -90,10 +98,10 @@
                     (setf ret (append (aref *grid* y x) ret)))))
       ret)))
 
-(declaim (inline distance))
-(declaim (ftype (function (point point) (unsigned-byte 16)) distance))
 (defmethod distance ((self point) (rhs point))
   "Return the distance between 2 points."
+  (declare (ftype (function (point point) (unsigned-byte 16)) distance)
+           (inline distance))
   (with-slots ((l-x x) (l-y y)) self
     (declare (type (signed-byte 16) l-x l-y))
     (with-slots ((r-x x) (r-y y)) rhs
