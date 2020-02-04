@@ -1,13 +1,8 @@
 #!/bin/sh
 #|
-exec ros -Q -- $0  "$@" -j $(nproc 2>/dev/null || echo 1)
+exec ros -Q -- $0  "$@"
 |#
 
-;; TODO: I'm pretty sure everything is loaded twice
-
-;; (progn ;;init forms
-;;   (ros:ensure-asdf)
-;;   (ql:quickload :swarm))
 
 (asdf:load-system :swarm)
 

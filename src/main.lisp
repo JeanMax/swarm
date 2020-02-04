@@ -1,7 +1,8 @@
 (in-package :swarm)
 (declaim (optimize (speed 3) (safety 1) (debug 3)))
 
-(declaim (type (unsigned-byte 16) *gang-size* *fps*))
+(declaim (type boolean *paused-p*))
+(declaim (type (unsigned-byte 16) *gang-size* *fps* *nproc*))
 (declaim (type list *boid-gang*))
 (defparameter *gang-size* 256
   "The total number of boids simulated.")
@@ -11,7 +12,8 @@
   "A special boid locked to the mouse coordinates.")
 
 
-(defparameter *nproc* 1)
+(defparameter *nproc*
+  (parse-integer (uiop:run-program "nproc 2>/dev/null || echo 1" :output 'string)))
 (defparameter *paused-p* nil)
 
 

@@ -63,7 +63,8 @@
   self)
 
 (defmethod mulf ((self point) scalar)
-  (declare (type single-float scalar))
+  (declare (type single-float scalar)
+           (inline distance))
   (with-slots ((l-x x) (l-y y)) self
     (declare (type (signed-byte 16) l-x l-y))
     (setf l-x (round (* l-x scalar)))
