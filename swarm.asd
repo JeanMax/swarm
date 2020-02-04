@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author "JeanMax"
   :license "LLGPL"
-  :depends-on ("lispbuilder-sdl" "unix-opts")
+  :depends-on ("lispbuilder-sdl" "unix-opts" "lparallel")
   :components ((:module "src"
                 :serial t
                 :components ((:file "packages")

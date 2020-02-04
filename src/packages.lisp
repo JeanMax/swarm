@@ -1,4 +1,4 @@
-(declaim (optimize (speed 3) (debug 3)))
+(declaim (optimize (speed 3) (safety 1) (debug 3)))
 
 
 (defpackage 2d
@@ -7,7 +7,7 @@
   (:export :point :circle :vect
            :x :y :radius :direction
            :*x* :*y* :*direction* :*previous-direction*  ; TODO: don't use muffle here
-           :+world-width+ :+world-height+
+           :+world-width+ :+world-height+ :+tile-size+
            :set-coords :add :sub :mulf :mul :div :move
            :reset-grid :find-points-in-range))
 
@@ -19,8 +19,9 @@
                 :point :circle :vect
                 :x :y :radius :direction
                 :*x* :*y* :*direction* :*previous-direction*
-                :+world-width+ :+world-height+
+                :+world-width+ :+world-height+ :+tile-size+
                 :set-coords :add :sub :mulf :mul :div :move
                 :reset-grid  :find-points-in-range)
   (:export :play
-           :*alignment-coef* :*cohesion-coef* :*separation-coef* :*gang-size*))
+           :*alignment-coef* :*cohesion-coef* :*separation-coef*
+           :*gang-size* :*nproc*))

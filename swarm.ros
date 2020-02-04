@@ -1,6 +1,6 @@
 #!/bin/sh
 #|
-exec ros -Q -- $0 "$@"
+exec ros -Q -- $0  "$@" -j $(nproc 2>/dev/null || echo 1)
 |#
 
 ;; TODO: I'm pretty sure everything is loaded twice
@@ -16,7 +16,7 @@ exec ros -Q -- $0 "$@"
   (:import-from :swarm
                 :play))
 (in-package :ros.script.swarm.3789237396)
-(declaim (optimize (speed 3) (debug 3)))
+(declaim (optimize (speed 3) (safety 1) (debug 3)))
 
 (defun parse-float (s)
   (declare (type (simple-array character) s))
@@ -42,39 +42,50 @@ exec ros -Q -- $0 "$@"
        ,@body)))
 
 (opts:define-opts
-  (:name :help
-   :description "print this help text"
-   :short #\h
-   :long "help")
+    (:name :help
+     :description "print this help text"
+     :short #\h
+     :long "help")
   ;; (:name :verbose
   ;;  :description "verbose output"
   ;;  ;; :required t
   ;;  :short #\v
   ;;  :long "verbose")
   (:name :n-boids
-   :description "the NUMBER of boids to simulate"
+   :description (format nil "the NUMBER of boids to simulate (default: ~D)"
+                        swarm:*gang-size*)
    :short #\n
    :long "n-boids"
    :arg-parser #'parse-integer
    :meta-var "N-BOIDS")
   (:name :coef-s
-   :description "the coefficient for the SEPARATION force"
+   :description (format nil "the coefficient for the SEPARATION force (default: ~D)"
+                        swarm:*separation-coef*)
    :short #\s
    :long "separation"
    :arg-parser #'parse-float
    :meta-var "COEF-S")
   (:name :coef-a
-   :description "the coefficient for the ALIGNMENT force"
+   :description (format nil "the coefficient for the ALIGNMENT force (default: ~D)"
+                        swarm:*alignment-coef*)
    :short #\a
    :long "alignment"
    :arg-parser #'parse-float
    :meta-var "COEF-A")
   (:name :coef-c
-   :description "the coefficient for the COHESION force"
+   :description (format nil "the coefficient for the COHESION force (default: ~D)"
+                        swarm:*cohesion-coef*)
    :short #\c
    :long "cohesion"
    :arg-parser #'parse-float
-   :meta-var "COEF-C"))
+   :meta-var "COEF-C")
+  (:name :nproc
+   :description (format nil "the number of parallel JOBS to run (default: ~D)"
+                        swarm:*nproc*)
+   :short #\j
+   :long "jobs"
+   :arg-parser #'parse-integer
+   :meta-var "NPROC"))
 
 
 (defun main (&rest argv)
@@ -96,16 +107,18 @@ exec ros -Q -- $0 "$@"
           (print-usage-and-exit 1)))
 
     (when-option (options :help)
-      (print-usage-and-exit 0))
+                 (print-usage-and-exit 0))
     ;; (format t "free args: ~{~a~^, ~}~%" free-args)
     ;; (when-option (options :verbose)
     ;;              (format t "OK, running in verbose mode…~%"))
     (when-option (options :n-boids)
-      (setf swarm:*gang-size* it))
+                 (setf swarm:*gang-size* it))
     (when-option (options :coef-s)
-      (setf swarm:*separation-coef* it))
+                 (setf swarm:*separation-coef* it))
     (when-option (options :coef-a)
-      (setf swarm:*alignment-coef* it))
+                 (setf swarm:*alignment-coef* it))
     (when-option (options :coef-c)
-      (setf swarm:*cohesion-coef* it)))
+                 (setf swarm:*cohesion-coef* it))
+    (when-option (options :nproc)
+                 (setf swarm:*nproc* it)))
   (swarm:play))

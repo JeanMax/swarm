@@ -1,11 +1,14 @@
 (in-package :swarm)
-(declaim (optimize (speed 3) (debug 3)))
+(declaim (optimize (speed 3) (safety 1) (debug 3)))
 
-(declaim (type (unsigned-byte 8) *boid-sight-range*))
-(defparameter *boid-sight-range* 50
+(declaim (type (unsigned-byte 8) +boid-sight-range+ +boid-max-speed+))
+; TODO: the relation with +tile-size+ should be the other way around
+(defparameter +boid-sight-range+ (/ +tile-size+ 2)
   "The height of the window/game (in pixels).")
-(defparameter *boid-sight-color* (sdl:color :r 255 :a 20)
+(defparameter +boid-sight-color+ (sdl:color :r 255 :a 20)
   "The height of the window/game (in pixels).")
+
+(defconstant +boid-max-speed+ 10)
 
 (declaim (type single-float *alignment-coef* *cohesion-coef* *separation-coef*))
 (defparameter *alignment-coef* 3.33)
@@ -15,17 +18,17 @@
 (defun mean-coord (direction-list)
   (let ((n-directions (list-length direction-list)))
     (when (> n-directions 0)
-        (labels ((mean-axis (axis-getter)
-                   (round (reduce #'+ (mapcar axis-getter direction-list))
-                          n-directions)))
-          ; TODO: don't allocate a point each time
-          (make-instance 'point :x (mean-axis #'*x*) :y (mean-axis #'*y*))))))
+      (labels ((mean-axis (axis-getter)
+                 (round (reduce #'+ (mapcar axis-getter direction-list))
+                        n-directions)))
+        ; TODO: don't allocate a point each time
+        (make-instance 'point :x (mean-axis #'*x*) :y (mean-axis #'*y*))))))
 
 (defun alignment-force (neighbors)
   (mulf
    (mean-coord
     (mapcar (lambda (n) (*previous-direction* n)) neighbors))
-  *alignment-coef*))
+   *alignment-coef*))
 
 (defun cohesion-force (self neighbors)
   (mulf (sub (mean-coord neighbors) self) *cohesion-coef*))
@@ -34,9 +37,9 @@
   (with-slots ((l-x x) (l-y y)) self
     (declare (type (signed-byte 16) l-x l-y))
     (mulf (mean-coord (mapcar
-                      (lambda (n) (sub (make-instance 'point :x l-x :y l-y) n))
-                      neighbors))
-         *separation-coef*)))
+                       (lambda (n) (sub (make-instance 'point :x l-x :y l-y) n))
+                       neighbors))
+          *separation-coef*)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BOID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -54,14 +57,14 @@
 (defmethod display ((self boid))
   "Display the given BOID on the sdl window."
   (with-slots (x y radius color) self
-    (sdl:draw-filled-circle-* x y *boid-sight-range* :color *boid-sight-color*)
+    (sdl:draw-filled-circle-* x y +boid-sight-range+ :color +boid-sight-color+)
     (sdl:draw-filled-circle-* x y radius :color color)))
 
 
 (defmethod apply-forces ((self boid))
   (let ((neighbors
-         (find-points-in-range self *boid-sight-range*))
-         (new-direction nil))
+          (find-points-in-range self +boid-sight-range+))
+        (new-direction nil))
     (unless (null neighbors)
       (setf new-direction
             (mean-coord (list (*direction* self)
@@ -69,8 +72,8 @@
                               (separation-force self neighbors)
                               (cohesion-force self neighbors))))
       (set-coords (*direction* self)
-                  (rem (the integer (*x* new-direction)) +world-width+)  ; rem -> speed limit
-                  (rem (the integer (*y* new-direction)) +world-height+)))))
+                  (rem (the integer (*x* new-direction)) +boid-max-speed+)
+                  (rem (the integer (*y* new-direction)) +boid-max-speed+)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; RANDOM ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

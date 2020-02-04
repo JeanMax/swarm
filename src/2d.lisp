@@ -1,24 +1,27 @@
 (in-package :2d)
-(declaim (optimize (speed 3) (debug 3)))
+(declaim (optimize (speed 3) (safety 1) (debug 3)))
 
 (declaim (type (unsigned-byte 16) +world-width+ +world-height+
-               +tile-size+ +grid-width+ +grid-height+))
+               +tile-size+ +grid-width+ +grid-height+ +random-move+))
 (declaim (type (simple-array list) *grid*))
 (defconstant +world-width+ 1280
   "The width of the window/game (in pixels).")
 (defconstant +world-height+ 720
   "The height of the window/game (in pixels).")
 
-(defconstant +tile-size+ 100)
+(defconstant +tile-size+ 30)
 (defconstant +grid-width+ (ceiling +world-width+ +tile-size+))
 (defconstant +grid-height+ (ceiling +world-height+ +tile-size+))
 (defparameter *grid* (make-array (list +grid-height+ +grid-width+)
                                  :initial-element nil))
 
+(defconstant +random-move+ 3)
+
+
 (defun reset-grid ()
   (loop for y of-type (unsigned-byte 16) from 0 below +grid-height+ do
-       (loop for x of-type (unsigned-byte 16) from 0 below +grid-width+ do
-            (setf (aref *grid* y x) nil))))
+           (loop for x of-type (unsigned-byte 16) from 0 below +grid-width+ do
+                    (setf (aref *grid* y x) nil))))
 
 (defclass point ()
   ((x
@@ -93,9 +96,9 @@
           (grid-x (truncate l-x +tile-size+)))
       (declare (type (unsigned-byte 16) offset grid-x grid-y))
       (loop for y from (- grid-y offset) below (+ grid-y offset 1) do
-           (loop for x from (- grid-x offset) below (+ grid-x offset 1) do
-                (when (and (< -1 y +grid-height+) (< -1 x +grid-width+))
-                    (setf ret (append (aref *grid* y x) ret)))))
+               (loop for x from (- grid-x offset) below (+ grid-x offset 1) do
+                        (when (and (< -1 y +grid-height+) (< -1 x +grid-width+))
+                          (setf ret (append (aref *grid* y x) ret)))))
       ret)))
 
 (defmethod distance ((self point) (rhs point))
@@ -106,10 +109,8 @@
     (declare (type (signed-byte 16) l-x l-y))
     (with-slots ((r-x x) (r-y y)) rhs
       (declare (type (signed-byte 16) r-x r-y))
-      (let ((x-diff (- r-x l-x))
-            (y-diff (- r-y l-y)))
-        (round (sqrt (+ (* x-diff x-diff)
-                        (* y-diff y-diff))))))))
+      (round (sqrt (+ (expt (- r-x l-x) 2)
+                      (expt (- r-y l-y) 2)))))))
 
 (defmethod find-points-in-range--slow ((self point) (point-list list) range
                                        include-self)
@@ -160,6 +161,8 @@
     (declare (type (signed-byte 16) x y))
     (with-slots ((x-dir x) (y-dir y)) direction
       (declare (type (signed-byte 16) x-dir y-dir))
+      (incf x (1- (random +random-move+)))
+      (incf y (1- (random +random-move+)))
       (setf x (mod (+ x x-dir) +world-width+))
       (setf y (mod (+ y y-dir) +world-height+))
       (set-coords previous-direction x-dir y-dir)

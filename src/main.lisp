@@ -1,5 +1,5 @@
 (in-package :swarm)
-(declaim (optimize (speed 3) (debug 3)))
+(declaim (optimize (speed 3) (safety 1) (debug 3)))
 
 (declaim (type (unsigned-byte 16) *gang-size* *fps*))
 (declaim (type list *boid-gang*))
@@ -11,10 +11,14 @@
   "A special boid locked to the mouse coordinates.")
 
 
+(defparameter *nproc* 1)
+(defparameter *paused-p* nil)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SDL ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defparameter *fps* 30
+(defparameter *fps* 60
   "Frame Per Seconds: this set SDL event loop speed.")
 (defparameter *textures-dir* "/home/mc/common-lisp/swarm/textures/" ;TODO
   "Where did you put these bmp files?")
@@ -24,7 +28,6 @@
 
 (defun init-window ()
   "Initialize the SDL window."
-  (setf *boid-gang* (loop repeat *gang-size* collect (make-random-boid)))
   (sdl:init-sdl)
   (sdl:window +world-width+ +world-height+
               :title-caption "Swarm"
@@ -36,19 +39,22 @@
 (defun frame-action ()
   "This function will be called each frame to handle all game logic (!graphics)."
   (reset-grid)
-  (mapc #'move (cons *super-boid* *boid-gang*))
+  (lparallel:pmapc #'move
+                   :size (+ 1 *gang-size*) (cons *super-boid* *boid-gang*))
   (with-slots (x y direction) *super-boid*
     (declare (type (signed-byte 16) x y))
     ;; (set-coords direction (- x (sdl:mouse-x)) (- y (sdl:mouse-y)))
     (setf x (sdl:mouse-x))
     (setf y (sdl:mouse-y)))
-  (mapc #'apply-forces (cons *super-boid* *boid-gang*)))
+  (lparallel:pmapc #'apply-forces
+                   :size (+ 1 *gang-size*) (cons *super-boid* *boid-gang*)))
 
 (defun redraw ()
   "Clear screen and redraw everything, then update display."
   ;; (sdl:clear-display sdl:*black*)
   (sdl:draw-surface *background-image*)
   (mapc #'display *boid-gang*)
+  ;; (lparallel:pmapc #'display *boid-gang*)
   (display *super-boid*)
   (sdl:update-display))
 
@@ -56,25 +62,24 @@
   "Handle the SDL events (keyboard mostly)."
   (sdl:with-events ()
     (:quit-event () t)
-
-    (:video-expose-event ()
-                         (sdl:update-display))
+    (:video-expose-event () (sdl:update-display))
 
     (:key-down-event (:key key)
-                     (when (sdl:key= key :sdl-key-escape)
-                       (sdl:push-quit-event)))
+     (when (sdl:key= key :sdl-key-escape)
+       (sdl:push-quit-event))
+     (when (sdl:key= key :sdl-key-space)
+       (setf *paused-p* (not *paused-p*))))
 
     (:mouse-button-down-event (:button button) ; :state state :x x :y y)
-                              (when (sdl:key= button sdl:sdl-button-left)
-                                (setf (*color* *super-boid*)
-                                      (make-random-color))))
+     (when (sdl:key= button sdl:sdl-button-left)
+       (setf (*color* *super-boid*)
+             (make-random-color))))
 
     (:idle ()
-
-           (frame-action)
-           (redraw)
-
-           )))
+     (unless *paused-p*
+       (frame-action)
+       (redraw)
+       ))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ENTRY POINT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -82,6 +87,9 @@
 
 (defun play ()
   "This is the entry point of the swarm simulator."
+  (format t "Press ESC to exit, SPC to pause.~&")
+  (setf *boid-gang* (loop repeat *gang-size* collect (make-random-boid)))
+  (setf lparallel:*kernel* (lparallel:make-kernel *nproc*))
   (init-window)
   (event-loop)
   (sdl:quit-sdl))

@@ -78,7 +78,7 @@ deps:
 # TODO: create symlink
 
 # install dev deps
-deps-test: $(PROJECT).asd
+deps-test:
 	$(ROS) -e '(ql:quickload :swarm/tests)'
 
 # remove all junk files
