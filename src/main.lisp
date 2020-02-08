@@ -14,6 +14,7 @@
 
 (defparameter *nproc*
   (parse-integer (uiop:run-program "nproc 2>/dev/null || echo 1" :output 'string)))
+(defparameter *mapper* #'mapc)
 (defparameter *paused-p* nil)
 
 
@@ -41,22 +42,20 @@
 (defun frame-action ()
   "This function will be called each frame to handle all game logic (!graphics)."
   (reset-grid)
-  (lparallel:pmapc #'move
-                   :size (+ 1 *gang-size*) (cons *super-boid* *boid-gang*))
+  (funcall *mapper* #'move (cons *super-boid* *boid-gang*))
   (with-slots (x y direction) *super-boid*
     (declare (type (signed-byte 16) x y))
     ;; (set-coords direction (- x (sdl:mouse-x)) (- y (sdl:mouse-y)))
     (setf x (sdl:mouse-x))
     (setf y (sdl:mouse-y)))
-  (lparallel:pmapc #'apply-forces
-                   :size (+ 1 *gang-size*) (cons *super-boid* *boid-gang*)))
+  (funcall *mapper* #'apply-forces (cons *super-boid* *boid-gang*)))
 
 (defun redraw ()
   "Clear screen and redraw everything, then update display."
   ;; (sdl:clear-display sdl:*black*)
   (sdl:draw-surface *background-image*)
-  (mapc #'display *boid-gang*)
-  ;; (lparallel:pmapc #'display *boid-gang*)
+  (mapc #'display *boid-gang*)  ; the order matter
+  ;; (lparallel:pmapc #'display :size (1+ *gang-size*) *boid-gang*)
   (display *super-boid*)
   (sdl:update-display))
 
@@ -91,7 +90,10 @@
   "This is the entry point of the swarm simulator."
   (format t "Press ESC to exit, SPC to pause.~&")
   (setf *boid-gang* (loop repeat *gang-size* collect (make-random-boid)))
-  (setf lparallel:*kernel* (lparallel:make-kernel *nproc*))
+  (when (< 1 *nproc*)
+    (setf *mapper* (lambda (fun l)
+                     (lparallel:pmapc fun :size (1+ *gang-size*) l)))
+    (setf lparallel:*kernel* (lparallel:make-kernel *nproc*)))
   (init-window)
   (event-loop)
   (sdl:quit-sdl))

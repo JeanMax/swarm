@@ -116,4 +116,4 @@ exec ros -Q -- $0  "$@"
                  (setf swarm:*cohesion-coef* it))
     (when-option (options :nproc)
                  (setf swarm:*nproc* it)))
-  (swarm:play))
+  (play))
