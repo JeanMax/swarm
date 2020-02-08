@@ -15,6 +15,13 @@
 (defparameter *cohesion-coef* 0.9)
 (defparameter *separation-coef* 0.9)
 
+(defconstant +angle-prout+ (/ (* 3 PI) 4))
+(defconstant +angle-pouet+ (- +angle-prout+))
+(defconstant +sin-b+ (sin +angle-prout+))
+(defconstant +cos-b+ (cos +angle-prout+))
+(defconstant +sin-a+ (sin +angle-pouet+))
+(defconstant +cos-a+ (cos +angle-pouet+))
+
 (defun mean-coord (direction-list)
   (let ((n-directions (list-length direction-list)))
     (when (> n-directions 0)
@@ -54,11 +61,33 @@
     :documentation "The color of the boid."))
   (:documentation "A boid (see: https://en.wikipedia.org/wiki/Boids)."))
 
+
+
 (defmethod display ((self boid))
-  "Display the given BOID on the sdl window."
-  (with-slots (x y radius color) self
+  "Display the given BOID on the sdl window. (Special cace-dedi to Pierrot le ouf!)"
+  (with-slots (x y direction radius color) self
     (sdl:draw-filled-circle-* x y +boid-sight-range+ :color +boid-sight-color+)
-    (sdl:draw-filled-circle-* x y radius :color color)))
+    ;; (let* ((x-dir (*x* direction))
+    ;;        (y-dir (*y* direction))
+
+    ;;        (x-a (+ x x-dir))
+    ;;        (y-a (+ y y-dir))  ; TODO: cut
+
+    ;;        (x-b (+ (* x-dir +cos-a+)      (* y-dir +sin-a+)))
+    ;;        (y-b (+ (* x-dir (- +sin-a+))) (* y-dir +cos-a+))
+
+    ;;        (x-c (+ (* x-dir +cos-b+)      (* y-dir +sin-b+)))
+    ;;        (y-c (+ (* x-dir (- +sin-b+))) (* y-dir +cos-b+)))
+
+    ;;        (if (= 0 x-dir y-dir)
+    ;;            (sdl:draw-filled-circle-* x y radius :color color)
+
+    ;;            (sdl:draw-filled-trigon
+    ;;             (sdl:point :x x-a :y y-a)
+    ;;             (sdl:point :x (+ x-a x-b) :y (+ y-a y-b))
+    ;;             (sdl:point :x (+ x-a x-c) :y (+ y-a y-c))
+    ;;             :color color)))))
+               (sdl:draw-filled-circle-* x y radius :color color)))
 
 
 (defmethod apply-forces ((self boid))
