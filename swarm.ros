@@ -37,15 +37,22 @@ exec ros -Q -- $0  "$@"
        ,@body)))
 
 (opts:define-opts
-    (:name :help
-     :description "print this help text"
-     :short #\h
-     :long "help")
+  (:name :help
+   :description "print this help text"
+   :short #\h
+   :long "help")
+
   ;; (:name :verbose
   ;;  :description "verbose output"
   ;;  ;; :required t
   ;;  :short #\v
   ;;  :long "verbose")
+
+  (:name :boxed-world
+   :description "boxed world (bounce instead of teleport)"
+   :short #\b
+   :long "boxed")
+
   (:name :n-boids
    :description (format nil "the NUMBER of boids to simulate (default: ~D)"
                         swarm:*gang-size*)
@@ -106,6 +113,8 @@ exec ros -Q -- $0  "$@"
     ;; (format t "free args: ~{~a~^, ~}~%" free-args)
     ;; (when-option (options :verbose)
     ;;              (format t "OK, running in verbose mode…~%"))
+    (when-option (options :boxed-world)
+                 (setf 2d:*boxed-world* t))
     (when-option (options :n-boids)
                  (setf swarm:*gang-size* it))
     (when-option (options :coef-s)

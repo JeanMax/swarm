@@ -17,6 +17,8 @@
 
 (defconstant +random-move+ 3)
 
+(defparameter *boxed-world* nil)
+
 
 (defun reset-grid ()
   (loop for y of-type (unsigned-byte 16) from 0 below +grid-height+ do
@@ -162,10 +164,22 @@
     (declare (type (signed-byte 16) x y))
     (with-slots ((x-dir x) (y-dir y)) direction
       (declare (type (signed-byte 16) x-dir y-dir))
-      (incf x (1- (random +random-move+)))
-      (incf y (1- (random +random-move+)))
-      (setf x (mod (+ x x-dir) +world-width+))
-      (setf y (mod (+ y y-dir) +world-height+))
+      (labels ((teleport ()
+                 (setf x (mod x +world-width+))
+                 (setf y (mod y +world-height+)))
+               (bounce ()
+                 (unless (<= 0 x (1- +world-width+))
+                   (setf x (- x x-dir x-dir))
+                   (setf x-dir (- x-dir)))
+                 (unless (<= 0 y (1- +world-height+))
+                   (setf y (- y y-dir y-dir))
+                   (setf y-dir (- y-dir)))))
+        (setf x (+ x x-dir))
+        (setf y (+ y y-dir))
+        ;; (incf x (1- (random +random-move+)))
+        ;; (incf y (1- (random +random-move+)))
+        (unless (and (<= 0 x (1- +world-width+)) (<= 0 y (1- +world-height+)))
+          (if *boxed-world* (bounce) (teleport))))
       (set-coords previous-direction x-dir y-dir)
       (push self (aref *grid*
                        (truncate (the (unsigned-byte 16) y) +tile-size+)
